@@ -1,0 +1,35 @@
+FROM mugglecloud/nginx-modsecurity-pre
+
+WORKDIR /usr/src/waf
+
+RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity  \
+  && cd ModSecurity \
+  && git submodule init \
+  && git submodule update  \
+  && ./build.sh  \
+  && ./configure \
+  && make  \
+  && make install
+
+#Download Nginx Connector
+RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git  \
+  && wget https://www.openssl.org/source/openssl-1.1.0j.tar.gz  \
+  && tar xvzf openssl-1.1.0j.tar.gz \
+  && wget https://openresty.org/download/openresty-1.17.8.2.tar.gz  \
+  && tar xvzf openresty-1.17.8.2.tar.gz \
+  && cd openresty-1.17.8.2  \
+  &&./configure --user=www-data --group=www-data \
+  --with-http_ssl_module \
+  --with-http_geoip_module \
+  --with-http_v2_module \
+  --with-http_realip_module \
+  --with-openssl=/usr/src/waf/openssl-1.1.0j \
+  --prefix=/opt/waf \
+  --sbin-path=/opt/waf/nginx/sbin/nginx \
+  --conf-path=/opt/waf/nginx/etc/nginx.conf \
+  --http-log-path=/opt/waf/nginx/var/log/access \
+  --error-log-path=/opt/waf/nginx/var/log/error \
+  --pid-path=/opt/waf/nginx/var/run/nginx.pid \
+  --lock-path=/opt/waf/nginx/var/run/nginx.lock \
+  --with-compat --add-dynamic-module=../ModSecurity-nginx \
+  && make && make install

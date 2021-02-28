@@ -1,0 +1,9 @@
+FROM debian:buster
+
+WORKDIR /usr/src/waf
+
+COPY sources.list .
+RUN rm /etc/apt/sources.list && mv sources.list /etc/apt/ 
+
+RUN apt-get update
+RUN apt-get install -y make git wget tar autoconf automake libtool m4 unzip pkgconf build-essential libcurl4-openssl-dev libpcre3 libpcre3-dev geoip-bin libgeoip-dev liblmdb-dev libpcre++-dev libtool libxml2-dev libyajl-dev zlib1g-dev

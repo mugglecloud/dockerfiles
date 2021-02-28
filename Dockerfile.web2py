@@ -1,5 +1,4 @@
 FROM python:3.8.6-slim
-
 #LABEL your_label
 
 COPY sources.list .
@@ -7,14 +6,11 @@ COPY pip.conf .
 RUN rm /etc/apt/sources.list && mv sources.list /etc/apt/ && mkdir -p ~/.pip && mv pip.conf ~/.pip/
 
 RUN apt update && \
-  apt install -y apt-utils unzip wget python-pip && \
+  apt install -y apt-utils unzip wget python3-pip && \
   pip install --upgrade pip && \
   pip install gevent
 
-RUN groupadd -r web2py && \
-  useradd -m -r -g web2py web2py
-
-USER web2py
+RUN mkdir -p /home/web2py/web2py
 
 RUN cd /home/web2py/ && \
   wget -c http://web2py.com/examples/static/web2py_src.zip && \
@@ -22,8 +18,6 @@ RUN cd /home/web2py/ && \
   rm -rf /home/web2py/web2py/applications/examples && \
   rm -rf /home/web2py/web2py/applications/welcome && \
   chmod 755 -R /home/web2py/web2py
-
-WORKDIR /home/web2py/web2py
 
 EXPOSE 8000
 
